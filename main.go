@@ -87,20 +87,18 @@ func download(p pipe.Pipe, ch chan Detail, file thread.File) {
 			ch <- Detail{File: file, Error: err}
 			return
 		}
+		defer res.Body.Close()
 
 		if res.StatusCode != 200 {
 			ch <- Detail{File: file, Error: fmt.Errorf("unexpected status code %d", res.StatusCode)}
 			return
 		}
 
-		defer res.Body.Close()
-
 		out, err := os.Create(filepath.Join(*Output, fmt.Sprintf("%s.%s", file.Name(), file.Extension())))
 		if err != nil {
 			ch <- Detail{File: file, Error: err}
 			return
 		}
-
 		defer out.Close()
 
 		w, err := io.Copy(out, res.Body)
