@@ -29,6 +29,7 @@ type Detail struct {
 
 func main() {
 	kingpin.Parse()
+
 	if err := os.MkdirAll(*Output, os.ModePerm); err != nil {
 		panic(err)
 	}

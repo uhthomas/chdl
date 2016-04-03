@@ -32,7 +32,6 @@ func NewChan7(u *url.URL) (Chan7, error) {
 	if len(matches) != 3 {
 		return Chan7{}, ErrInvalidURLFormat
 	}
-
 	return Chan7{u, matches[1], matches[2]}, nil
 }
 
@@ -53,7 +52,6 @@ func (c7 Chan7) Posts() (posts []Post, err error) {
 	if err != nil {
 		return nil, err
 	}
-
 	u.Query().Set("b", c7.board)
 	u.Query().Set("t", c7.thread)
 	u.Query().Set("p", "p1--")
@@ -62,7 +60,6 @@ func (c7 Chan7) Posts() (posts []Post, err error) {
 	if err != nil {
 		return nil, err
 	}
-
 	doc.Find(".post").Each(func(i int, s *goquery.Selection) {
 		post := Chan7Post{board: c7.board}
 
@@ -72,7 +69,6 @@ func (c7 Chan7) Posts() (posts []Post, err error) {
 			post.Name = sp[0]
 			post.Extension = sp[1]
 		}
-
 		s.Find("span.multithumbfirst a, span.multithumb a").Each(func(x int, ts *goquery.Selection) {
 			iu, _ := ts.Attr("href")
 			_, n := path.Split(iu)
@@ -82,7 +78,6 @@ func (c7 Chan7) Posts() (posts []Post, err error) {
 				Extension string
 			}{sp[0], sp[1]})
 		})
-
 		posts = append(posts, post)
 	})
 	return
@@ -93,6 +88,7 @@ func (c7 Chan7) Files(excludeExtras bool) (files []File, err error) {
 	if err != nil {
 		return nil, err
 	}
+
 	for _, post := range posts {
 		files = append(files, post.Files(excludeExtras)...)
 	}
@@ -120,6 +116,7 @@ func (c7p Chan7Post) Files(excludeExtras bool) (files []File) {
 	if c7p.Extras == nil || excludeExtras {
 		return
 	}
+
 	for _, extra := range c7p.Extras {
 		files = append(files, Chan7File{c7p.board, extra.Name, extra.Extension})
 	}

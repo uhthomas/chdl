@@ -24,7 +24,6 @@ func NewChan8(u *url.URL) (Chan8, error) {
 	if len(matches) != 3 {
 		return Chan8{}, ErrInvalidURLFormat
 	}
-
 	return Chan8{u, matches[1], matches[2]}, nil
 }
 
@@ -58,7 +57,6 @@ func (c8 Chan8) Posts() (posts []Post, err error) {
 		post.board = c8.board
 		posts = append(posts, post)
 	}
-
 	return
 }
 
@@ -71,7 +69,6 @@ func (c8 Chan8) Files(excludeExtras bool) (files []File, err error) {
 	for _, post := range posts {
 		files = append(files, post.Files(excludeExtras)...)
 	}
-
 	return
 }
 
@@ -94,7 +91,6 @@ func (c8p Chan8Post) Files(excludeExtras bool) (files []File) {
 	if c8p.Name != "" {
 		files = append(files, Chan8File{c8p.board, c8p.Name.String(), c8p.Extension[1:]})
 	}
-
 	if c8p.Extras == nil || excludeExtras {
 		return
 	}
@@ -102,7 +98,6 @@ func (c8p Chan8Post) Files(excludeExtras bool) (files []File) {
 	for _, extra := range c8p.Extras {
 		files = append(files, Chan8File{c8p.board, extra.Name, extra.Extension[1:]})
 	}
-
 	return
 }
 

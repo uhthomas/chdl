@@ -24,7 +24,6 @@ func NewChan4(u *url.URL) (Chan4, error) {
 	if len(matches) != 3 {
 		return Chan4{}, ErrInvalidURLFormat
 	}
-
 	return Chan4{u, matches[1], matches[2]}, nil
 }
 
@@ -58,7 +57,6 @@ func (c4 Chan4) Posts() (posts []Post, err error) {
 		post.board = c4.board
 		posts = append(posts, post)
 	}
-
 	return
 }
 
@@ -71,7 +69,6 @@ func (c4 Chan4) Files(excludeExtras bool) (files []File, err error) {
 	for _, post := range posts {
 		files = append(files, post.Files(excludeExtras)...)
 	}
-
 	return
 }
 
@@ -94,7 +91,6 @@ func (c4p Chan4Post) Files(excludeExtras bool) (files []File) {
 	if c4p.Name != "" {
 		files = append(files, Chan4File{c4p.board, c4p.Name.String(), c4p.Extension[1:]})
 	}
-
 	if c4p.Extras == nil || excludeExtras {
 		return
 	}
@@ -102,7 +98,6 @@ func (c4p Chan4Post) Files(excludeExtras bool) (files []File) {
 	for _, extra := range c4p.Extras {
 		files = append(files, Chan4File{c4p.board, extra.Name, extra.Extension[1:]})
 	}
-
 	return
 }
 
