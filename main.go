@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"go-chdl/thread"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"./thread"
 
 	"github.com/6f7262/pipe"
 	humanize "github.com/dustin/go-humanize"
