@@ -183,6 +183,10 @@ func (c4p Chan4Post) Board() string {
 	return c4p.board
 }
 
+func (c4p Chan4Post) Thread() string {
+	return c4p.thread
+}
+
 func (c4p Chan4Post) Files(excludeExtras bool) (files []File) {
 	if c4p.Name != "" {
 		files = append(files, Chan4File{c4p.board, c4p.thread, c4p.Name.String(), c4p.Extension[1:]})

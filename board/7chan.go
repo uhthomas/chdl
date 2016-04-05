@@ -192,6 +192,10 @@ func (c7p Chan7Post) Board() string {
 	return c7p.board
 }
 
+func (c7p Chan7Post) Thread() string {
+	return c7p.thread
+}
+
 func (c7p Chan7Post) Files(excludeExtras bool) (files []File) {
 	if c7p.Name != "" {
 		files = append(files, Chan7File{c7p.board, c7p.thread, c7p.Name, c7p.Extension})

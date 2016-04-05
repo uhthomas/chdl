@@ -29,6 +29,7 @@ type Thread interface {
 
 type Post interface {
 	Board() string
+	Thread() string
 	Files(bool) []File
 }
 

@@ -183,6 +183,10 @@ func (c8p Chan8Post) Board() string {
 	return c8p.board
 }
 
+func (c8p Chan8Post) Thread() string {
+	return c8p.thread
+}
+
 func (c8p Chan8Post) Files(excludeExtras bool) (files []File) {
 	if c8p.Name != "" {
 		files = append(files, Chan8File{c8p.board, c8p.thread, c8p.Name.String(), c8p.Extension[1:]})
