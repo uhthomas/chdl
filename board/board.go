@@ -1,4 +1,4 @@
-package thread
+package board
 
 import (
 	"errors"
@@ -9,6 +9,15 @@ var (
 	ErrUnknownChan      = errors.New("unknown or unsupported chan")
 	ErrInvalidURLFormat = errors.New("invalid chan url format")
 )
+
+type Board interface {
+	Board() string
+	Thread(string) Thread
+	Threads() ([]Thread, error)
+	Page(int) ([]Thread, error)
+	Posts() ([]Post, error)
+	Files(bool) ([]File, error)
+}
 
 type Thread interface {
 	URL() string
@@ -26,11 +35,12 @@ type Post interface {
 type File interface {
 	URL() string
 	Board() string
+	Thread() string
 	Name() string
 	Extension() string
 }
 
-func New(u *url.URL) (Thread, error) {
+func New(u *url.URL) (Board, error) {
 	switch u.Host {
 	case "boards.4chan.org":
 		return NewChan4(u)
@@ -40,4 +50,16 @@ func New(u *url.URL) (Thread, error) {
 		return NewChan8(u)
 	}
 	return nil, ErrUnknownChan
+}
+
+func Detail(u *url.URL) (board, thread string, err error) {
+	switch u.Host {
+	case "boards.4chan.org":
+		return DetailChan4(u)
+	case "7chan.org":
+		return DetailChan7(u)
+	case "8ch.net":
+		return DetailChan8(u)
+	}
+	return "", "", ErrUnknownChan
 }

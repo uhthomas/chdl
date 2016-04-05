@@ -18,6 +18,6 @@ Flags:
   -e, --exclude-extras  Exclude extra files
 
 Args:
-  <url>  Thread URL
+  <url>  Board or thread URL
 
 ```
