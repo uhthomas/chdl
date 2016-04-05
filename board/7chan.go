@@ -9,6 +9,15 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+type Chan7 struct {
+	board string
+}
+
+func NewChan7(u *url.URL) (Chan7, error) {
+	board, _, err := DetailChan7(u)
+	return Chan7{board}, err
+}
+
 func DetailChan7(u *url.URL) (board, thread string, err error) {
 	if u.Path == "/read.php" {
 		q := u.Query()
@@ -28,15 +37,6 @@ func DetailChan7(u *url.URL) (board, thread string, err error) {
 		thread = strings.Split(s[2], ".")[0]
 	}
 	return
-}
-
-type Chan7 struct {
-	board string
-}
-
-func NewChan7(u *url.URL) (Chan7, error) {
-	board, _, err := DetailChan7(u)
-	return Chan7{board}, err
 }
 
 func (c7 Chan7) Board() string {

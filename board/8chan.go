@@ -8,6 +8,15 @@ import (
 	"strings"
 )
 
+type Chan8 struct {
+	board string
+}
+
+func NewChan8(u *url.URL) (Chan8, error) {
+	board, _, err := DetailChan8(u)
+	return Chan8{board}, err
+}
+
 func DetailChan8(u *url.URL) (board, thread string, err error) {
 	s := strings.Split(strings.Trim(u.Path, "/"), "/")
 	if len(s) > 0 {
@@ -17,15 +26,6 @@ func DetailChan8(u *url.URL) (board, thread string, err error) {
 		thread = strings.Split(s[2], ".")[0]
 	}
 	return
-}
-
-type Chan8 struct {
-	board string
-}
-
-func NewChan8(u *url.URL) (Chan8, error) {
-	board, _, err := DetailChan8(u)
-	return Chan8{board}, err
 }
 
 func (c8 Chan8) Board() string {
