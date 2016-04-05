@@ -12,6 +12,11 @@ type Chan4 struct {
 	board string
 }
 
+func NewChan4(u *url.URL) (Chan4, error) {
+	board, _, err := DetailChan4(u)
+	return Chan4{board}, err
+}
+
 func DetailChan4(u *url.URL) (board, thread string, err error) {
 	s := strings.Split(strings.Trim(u.Path, "/"), "/")
 	if len(s) > 0 {
@@ -21,11 +26,6 @@ func DetailChan4(u *url.URL) (board, thread string, err error) {
 		thread = s[2]
 	}
 	return
-}
-
-func NewChan4(u *url.URL) (Chan4, error) {
-	board, _, err := DetailChan4(u)
-	return Chan4{board}, err
 }
 
 func (c4 Chan4) Board() string {
