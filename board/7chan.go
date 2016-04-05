@@ -15,7 +15,7 @@ func DetailChan7(u *url.URL) (board, thread string, err error) {
 		board = q.Get("b")
 		thread = q.Get("t")
 		if board == "" {
-			return "", "", ErrInvalidURLFormat
+			err = ErrInvalidURLFormat
 		}
 		return
 	}
