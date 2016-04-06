@@ -38,7 +38,7 @@ func (c8 Chan8) Thread(thread string) Thread {
 
 func (c8 Chan8) Threads() (threads []Thread, err error) {
 	for i := 0; i < 16; i++ {
-		page, err := c8.Page(i + 1)
+		page, err := c8.Page(i)
 		if err != nil {
 			return nil, err
 		}

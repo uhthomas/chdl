@@ -173,10 +173,6 @@ type Chan4Post struct {
 
 	Name      json.Number `json:"tim,Number,omitempty"`
 	Extension string      `json:"ext,omitempty"`
-	Extras    []struct {
-		Name      string `json:"tim,Number"`
-		Extension string `json:"ext"`
-	} `json:"extra,omitempty"`
 }
 
 func (c4p Chan4Post) Board() string {
@@ -190,13 +186,6 @@ func (c4p Chan4Post) Thread() string {
 func (c4p Chan4Post) Files(excludeExtras bool) (files []File) {
 	if c4p.Name != "" {
 		files = append(files, Chan4File{c4p.board, c4p.thread, c4p.Name.String(), c4p.Extension[1:]})
-	}
-	if c4p.Extras == nil || excludeExtras {
-		return
-	}
-
-	for _, extra := range c4p.Extras {
-		files = append(files, Chan4File{c4p.board, c4p.thread, extra.Name, extra.Extension[1:]})
 	}
 	return
 }

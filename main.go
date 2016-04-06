@@ -75,6 +75,10 @@ func main() {
 	}
 
 	for {
+    if done == len(files) {
+      break
+    }
+    
 		d := <-ch
 		done++
 		str := fmt.Sprintf("[%d/%d] ", done, len(files))
@@ -85,10 +89,6 @@ func main() {
 			fmt.Printf("%sFinished downloading %s/%s.%s (%s)\b\n", str,
 				d.File.Board(), d.File.Name(), d.File.Extension(), humanize.Bytes(d.Size))
 			downloaded += d.Size
-		}
-
-		if done == len(files) {
-			break
 		}
 	}
 
