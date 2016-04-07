@@ -75,10 +75,10 @@ func main() {
 	}
 
 	for {
-    if done == len(files) {
-      break
-    }
-    
+		if done == len(files) {
+			break
+		}
+
 		d := <-ch
 		done++
 		str := fmt.Sprintf("[%d/%d] ", done, len(files))

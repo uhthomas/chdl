@@ -43,11 +43,11 @@ type File interface {
 
 func New(u *url.URL) (Board, error) {
 	switch u.Host {
-	case "4chan.org", "boards.4chan.org":
+	case "boards.4chan.org", "www.4chan.org", "4chan.org":
 		return NewChan4(u)
-	case "7chan.org":
+	case "www.7chan.org", "7chan.org":
 		return NewChan7(u)
-	case "8ch.net":
+	case "www.8ch.net", "8ch.net":
 		return NewChan8(u)
 	}
 	return nil, ErrUnknownChan
@@ -55,11 +55,11 @@ func New(u *url.URL) (Board, error) {
 
 func Detail(u *url.URL) (board, thread string, err error) {
 	switch u.Host {
-	case "4chan.org", "boards.4chan.org":
+	case "boards.4chan.org", "www.4chan.org", "4chan.org":
 		return DetailChan4(u)
-	case "7chan.org":
+	case "www.7chan.org", "7chan.org":
 		return DetailChan7(u)
-	case "8ch.net":
+	case "www.8ch.net", "8ch.net":
 		return DetailChan8(u)
 	}
 	return "", "", ErrUnknownChan
