@@ -198,14 +198,24 @@ func (c7p Chan7Post) Thread() string {
 
 func (c7p Chan7Post) Files(excludeExtras bool) (files []File) {
 	if c7p.Name != "" {
-		files = append(files, Chan7File{c7p.board, c7p.thread, c7p.Name, c7p.Extension})
+		files = append(files, Chan7File{
+			board:     c7p.board,
+			thread:    c7p.thread,
+			name:      c7p.Name,
+			extension: c7p.Extension,
+		})
 	}
 	if c7p.Extras == nil || excludeExtras {
 		return
 	}
 
 	for _, extra := range c7p.Extras {
-		files = append(files, Chan7File{c7p.board, c7p.thread, extra.Name, extra.Extension})
+		files = append(files, Chan7File{
+			board:     c7p.board,
+			thread:    c7p.thread,
+			name:      extra.Name,
+			extension: extra.Extension,
+		})
 	}
 	return
 }

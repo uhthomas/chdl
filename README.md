@@ -1,5 +1,5 @@
 # chdl
-A chan downloader written in Go.
+A <4,7,8>chan downloader written in Go.
 
 ## Currently supported chans:
 * 4chan
@@ -8,16 +8,15 @@ A chan downloader written in Go.
 
 ## Usage
 ```
-go-chdl [<flags>] <url>
-
-Flags:
-      --help            Show context-sensitive help (also try --help-long and
-                        --help-man).
-  -l, --limit=10        Concurrent download limit
-  -o, --out="chdl"      Output directory for downloaded files
-  -e, --exclude-extras  Exclude extra files
-
-Args:
-  <url>  Board or thread URL
-
+Usage of chdl:
+  -exclude-extras
+        Don't download extra files
+  -limit int
+        Concurrent download limit (default 10)
+  -out string
+        Output directory for files. (default "chdl")
+  -url string
+        Board or thread URL.
+url can also be set by passing it after the flags like: 
+  chdl -limit 5 https://4chan.org/b
 ```
