@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/uhthomas/chdl/pkg"
 )
 
 type Chan4 struct {
@@ -34,11 +32,11 @@ func (c4 Chan4) Board() string {
 	return c4.board
 }
 
-func (c4 Chan4) Thread(thread string) pkg.Thread {
+func (c4 Chan4) Thread(thread string) Thread {
 	return Chan4Thread{c4.board, thread}
 }
 
-func (c4 Chan4) Threads() (threads []pkg.Thread, err error) {
+func (c4 Chan4) Threads() (threads []Thread, err error) {
 	for i := 0; i < 10; i++ {
 		page, err := c4.Page(i + 1)
 		if err != nil {
@@ -54,7 +52,7 @@ func (c4 Chan4) Threads() (threads []pkg.Thread, err error) {
 	return
 }
 
-func (c4 Chan4) Page(i int) (threads []pkg.Thread, err error) {
+func (c4 Chan4) Page(i int) (threads []Thread, err error) {
 	res, err := http.Get(fmt.Sprintf("https://a.4cdn.org/%s/%d.json", c4.board, i))
 	if err != nil {
 		return nil, err
@@ -86,7 +84,7 @@ func (c4 Chan4) Page(i int) (threads []pkg.Thread, err error) {
 	return
 }
 
-func (c4 Chan4) Posts() (posts []pkg.Post, err error) {
+func (c4 Chan4) Posts() (posts []Post, err error) {
 	threads, err := c4.Threads()
 	if err != nil {
 		return nil, err
@@ -102,7 +100,7 @@ func (c4 Chan4) Posts() (posts []pkg.Post, err error) {
 	return
 }
 
-func (c4 Chan4) Files(excludeExtras bool) (files []pkg.File, err error) {
+func (c4 Chan4) Files(excludeExtras bool) (files []File, err error) {
 	threads, err := c4.Threads()
 	if err != nil {
 		return nil, err
@@ -135,7 +133,7 @@ func (c4t Chan4Thread) Thread() string {
 	return c4t.thread
 }
 
-func (c4t Chan4Thread) Posts() (posts []pkg.Post, err error) {
+func (c4t Chan4Thread) Posts() (posts []Post, err error) {
 	res, err := http.Get(c4t.URL())
 	if err != nil {
 		return nil, err
@@ -157,7 +155,7 @@ func (c4t Chan4Thread) Posts() (posts []pkg.Post, err error) {
 	return
 }
 
-func (c4t Chan4Thread) Files(excludeExtras bool) (files []pkg.File, err error) {
+func (c4t Chan4Thread) Files(excludeExtras bool) (files []File, err error) {
 	posts, err := c4t.Posts()
 	if err != nil {
 		return nil, err
@@ -185,7 +183,7 @@ func (c4p Chan4Post) Thread() string {
 	return c4p.thread
 }
 
-func (c4p Chan4Post) Files(excludeExtras bool) (files []pkg.File) {
+func (c4p Chan4Post) Files(excludeExtras bool) (files []File) {
 	if c4p.Name != "" {
 		files = append(files, Chan4File{c4p.board, c4p.thread, c4p.Name.String(), c4p.Extension[1:]})
 	}
