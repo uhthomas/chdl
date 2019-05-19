@@ -1,4 +1,4 @@
-package board
+package chdl
 
 import (
 	"encoding/json"
@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/uhthomas/chdl/pkg"
 )
 
 type Chan8 struct {
@@ -32,11 +34,11 @@ func (c8 Chan8) Board() string {
 	return c8.board
 }
 
-func (c8 Chan8) Thread(thread string) Thread {
+func (c8 Chan8) Thread(thread string) pkg.Thread {
 	return Chan8Thread{c8.board, thread}
 }
 
-func (c8 Chan8) Threads() (threads []Thread, err error) {
+func (c8 Chan8) Threads() (threads []pkg.Thread, err error) {
 	for i := 0; i < 16; i++ {
 		page, err := c8.Page(i)
 		if err != nil {
@@ -52,7 +54,7 @@ func (c8 Chan8) Threads() (threads []Thread, err error) {
 	return
 }
 
-func (c8 Chan8) Page(i int) (threads []Thread, err error) {
+func (c8 Chan8) Page(i int) (threads []pkg.Thread, err error) {
 	res, err := http.Get(fmt.Sprintf("https://8ch.net/%s/%d.json", c8.board, i))
 	if err != nil {
 		return nil, err
@@ -84,7 +86,7 @@ func (c8 Chan8) Page(i int) (threads []Thread, err error) {
 	return
 }
 
-func (c8 Chan8) Posts() (posts []Post, err error) {
+func (c8 Chan8) Posts() (posts []pkg.Post, err error) {
 	threads, err := c8.Threads()
 	if err != nil {
 		return nil, err
@@ -100,7 +102,7 @@ func (c8 Chan8) Posts() (posts []Post, err error) {
 	return
 }
 
-func (c8 Chan8) Files(excludeExtras bool) (files []File, err error) {
+func (c8 Chan8) Files(excludeExtras bool) (files []pkg.File, err error) {
 	threads, err := c8.Threads()
 	if err != nil {
 		return nil, err
@@ -133,7 +135,7 @@ func (c8t Chan8Thread) Thread() string {
 	return c8t.thread
 }
 
-func (c8t Chan8Thread) Posts() (posts []Post, err error) {
+func (c8t Chan8Thread) Posts() (posts []pkg.Post, err error) {
 	res, err := http.Get(c8t.URL())
 	if err != nil {
 		return nil, err
@@ -155,7 +157,7 @@ func (c8t Chan8Thread) Posts() (posts []Post, err error) {
 	return
 }
 
-func (c8t Chan8Thread) Files(excludeExtras bool) (files []File, err error) {
+func (c8t Chan8Thread) Files(excludeExtras bool) (files []pkg.File, err error) {
 	posts, err := c8t.Posts()
 	if err != nil {
 		return nil, err
@@ -187,7 +189,7 @@ func (c8p Chan8Post) Thread() string {
 	return c8p.thread
 }
 
-func (c8p Chan8Post) Files(excludeExtras bool) (files []File) {
+func (c8p Chan8Post) Files(excludeExtras bool) (files []pkg.File) {
 	if c8p.Name != "" {
 		files = append(files, Chan8File{c8p.board, c8p.thread, c8p.Name.String(), c8p.Extension[1:]})
 	}

@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/uhthomas/chdl/board"
+	"github.com/uhthomas/chdl/pkg"
 	"github.com/uhthomas/pipe"
 )
 
@@ -62,20 +62,20 @@ func main() {
 
 	u, err := url.Parse(flag.Arg(0))
 	if err != nil {
-		log.Fatal("invalid board or thread url")
+		log.Fatal("invalid chdl or thread url")
 	}
 
-	_, thread, err := board.Detail(u)
+	_, thread, err := pkg.Detail(u)
 	if err != nil {
 		panic(err)
 	}
 
-	b, err := board.New(u)
+	b, err := pkg.New(u)
 	if err != nil {
 		panic(err)
 	}
 
-	var files []board.File
+	var files []pkg.File
 
 	if thread == "" {
 		fmt.Printf("Are you sure you want to download everything in /%s? y/n: ", b.Board())

@@ -1,8 +1,10 @@
-package board
+package chdl
 
 import (
 	"errors"
 	"net/url"
+
+	"github.com/uhthomas/chdl/pkg"
 )
 
 var (
@@ -44,11 +46,11 @@ type File interface {
 func New(u *url.URL) (Board, error) {
 	switch u.Host {
 	case "boards.4chan.org", "www.4chan.org", "4chan.org":
-		return NewChan4(u)
+		return pkg.NewChan4(u)
 	case "www.7chan.org", "7chan.org":
-		return NewChan7(u)
+		return pkg.NewChan7(u)
 	case "www.8ch.net", "8ch.net":
-		return NewChan8(u)
+		return pkg.NewChan8(u)
 	}
 	return nil, ErrUnknownChan
 }
@@ -56,11 +58,11 @@ func New(u *url.URL) (Board, error) {
 func Detail(u *url.URL) (board, thread string, err error) {
 	switch u.Host {
 	case "boards.4chan.org", "www.4chan.org", "4chan.org":
-		return DetailChan4(u)
+		return pkg.DetailChan4(u)
 	case "www.7chan.org", "7chan.org":
-		return DetailChan7(u)
+		return pkg.DetailChan7(u)
 	case "www.8ch.net", "8ch.net":
-		return DetailChan8(u)
+		return pkg.DetailChan8(u)
 	}
 	return "", "", ErrUnknownChan
 }

@@ -1,4 +1,4 @@
-package board
+package chdl
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/uhthomas/chdl/pkg"
 )
 
 type Chan7 struct {
@@ -24,7 +25,7 @@ func DetailChan7(u *url.URL) (board, thread string, err error) {
 		board = q.Get("b")
 		thread = q.Get("t")
 		if board == "" {
-			err = ErrInvalidURLFormat
+			err = pkg.ErrInvalidURLFormat
 		}
 		return
 	}
@@ -43,11 +44,11 @@ func (c7 Chan7) Board() string {
 	return c7.board
 }
 
-func (c7 Chan7) Thread(thread string) Thread {
+func (c7 Chan7) Thread(thread string) pkg.Thread {
 	return Chan7Thread{c7.board, thread}
 }
 
-func (c7 Chan7) Threads() (threads []Thread, err error) {
+func (c7 Chan7) Threads() (threads []pkg.Thread, err error) {
 	for i := 0; i < 8; i++ {
 		page, err := c7.Page(i + 1)
 		if err != nil {
@@ -59,7 +60,7 @@ func (c7 Chan7) Threads() (threads []Thread, err error) {
 	return
 }
 
-func (c7 Chan7) Page(i int) (threads []Thread, err error) {
+func (c7 Chan7) Page(i int) (threads []pkg.Thread, err error) {
 	u := fmt.Sprintf("https://7chan.org/%s", c7.board)
 	if i > 1 {
 		u = fmt.Sprintf("%s/%d.json", u, i)
@@ -83,7 +84,7 @@ func (c7 Chan7) Page(i int) (threads []Thread, err error) {
 	return
 }
 
-func (c7 Chan7) Posts() (posts []Post, err error) {
+func (c7 Chan7) Posts() (posts []pkg.Post, err error) {
 	threads, err := c7.Threads()
 	if err != nil {
 		return nil, err
@@ -99,7 +100,7 @@ func (c7 Chan7) Posts() (posts []Post, err error) {
 	return
 }
 
-func (c7 Chan7) Files(excludeExtras bool) (files []File, err error) {
+func (c7 Chan7) Files(excludeExtras bool) (files []pkg.File, err error) {
 	threads, err := c7.Threads()
 	if err != nil {
 		return nil, err
@@ -136,7 +137,7 @@ func (c7t Chan7Thread) Thread() string {
 	return c7t.thread
 }
 
-func (c7t Chan7Thread) Posts() (posts []Post, err error) {
+func (c7t Chan7Thread) Posts() (posts []pkg.Post, err error) {
 	doc, err := goquery.NewDocument(c7t.URL())
 	if err != nil {
 		return nil, err
@@ -164,7 +165,7 @@ func (c7t Chan7Thread) Posts() (posts []Post, err error) {
 	return
 }
 
-func (c7t Chan7Thread) Files(excludeExtras bool) (files []File, err error) {
+func (c7t Chan7Thread) Files(excludeExtras bool) (files []pkg.File, err error) {
 	posts, err := c7t.Posts()
 	if err != nil {
 		return nil, err
@@ -196,7 +197,7 @@ func (c7p Chan7Post) Thread() string {
 	return c7p.thread
 }
 
-func (c7p Chan7Post) Files(excludeExtras bool) (files []File) {
+func (c7p Chan7Post) Files(excludeExtras bool) (files []pkg.File) {
 	if c7p.Name != "" {
 		files = append(files, Chan7File{c7p.board, c7p.thread, c7p.Name, c7p.Extension})
 	}
