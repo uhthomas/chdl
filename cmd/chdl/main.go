@@ -54,13 +54,26 @@ func download(ctx context.Context, url, dir, name string) (n int64, err error) {
 
 func main() {
 	var (
+		rawurl        = flag.String("url", "", "Board or thread URL.")
 		limit         = flag.Int("limit", 10, "Concurrent download limit")
 		out           = flag.String("out", "chdl", "Output directory for files.")
 		excludeExtras = flag.Bool("exclude-extras", false, "Don't download extra files")
 	)
+
+	usage := flag.Usage
+	flag.Usage = func() {
+		usage()
+		fmt.Println("url can also be set by passing it after the flags like: ")
+		fmt.Println("  chdl -limit 5 https://4chan.org/b")
+	}
+
 	flag.Parse()
 
-	u, err := url.Parse(flag.Arg(0))
+	if *rawurl == "" {
+		*rawurl = flag.Arg(0)
+	}
+
+	u, err := url.Parse(*rawurl)
 	if err != nil {
 		log.Fatal("invalid chdl or thread url")
 	}
