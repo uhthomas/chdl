@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/6f7262/go-chdl/board"
-	"github.com/6f7262/pipe"
-	humanize "github.com/dustin/go-humanize"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
+	"github.com/dustin/go-humanize"
+	"github.com/uhthomas/chdl/board"
+	"github.com/uhthomas/pipe"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
