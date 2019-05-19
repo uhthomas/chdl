@@ -1,140 +1,154 @@
 package main
 
 import (
-	"errors"
+	"context"
+	"flag"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/dustin/go-humanize"
 	"github.com/uhthomas/chdl/board"
 	"github.com/uhthomas/pipe"
-	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-var (
-	URL           = kingpin.Arg("url", "Board or thread URL").Required().URL()
-	Limit         = kingpin.Flag("limit", "Concurrent download limit").Default("10").Short('l').Int()
-	Output        = kingpin.Flag("out", "Output directory for downloaded files").Default("chdl").Short('o').String()
-	ExcludeExtras = kingpin.Flag("exclude-extras", "Exclude extra files").Default("false").Short('e').Bool()
-)
+func download(ctx context.Context, url, dir, name string) (n int64, err error) {
+	if err := os.MkdirAll(dir, 0777); err != nil {
+		return 0, err
+	}
 
-type Detail struct {
-	File  board.File
-	Error error
-	Size  uint64
+	if _, err := os.Stat(filepath.Join(dir, name)); os.IsExist(err) {
+		return 0, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	res, err := (&http.Client{Timeout: 10 * time.Second}).Do(req.WithContext(ctx))
+	if err != nil {
+		return 0, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("unexpect status code %d", res.StatusCode)
+	}
+
+	f, err := os.Create(filepath.Join(dir, name))
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+
+	return io.Copy(f, res.Body)
 }
 
 func main() {
-	kingpin.Parse()
-
-	_, thread, err := board.Detail(*URL)
-	if err != nil {
-		panic(err)
-	}
-
-	b, err := board.New(*URL)
-	if err != nil {
-		panic(err)
-	}
-
 	var (
-		files []board.File
-		ferr  error
+		limit         = flag.Int("limit", 10, "Concurrent download limit")
+		out           = flag.String("out", "chdl", "Output directory for files.")
+		excludeExtras = flag.Bool("exclude-extras", false, "Don't download extra files")
 	)
+	flag.Parse()
+
+	u, err := url.Parse(flag.Arg(0))
+	if err != nil {
+		log.Fatal("invalid board or thread url")
+	}
+
+	_, thread, err := board.Detail(u)
+	if err != nil {
+		panic(err)
+	}
+
+	b, err := board.New(u)
+	if err != nil {
+		panic(err)
+	}
+
+	var files []board.File
 
 	if thread == "" {
 		fmt.Printf("Are you sure you want to download everything in /%s? y/n: ", b.Board())
 		var in string
-		fmt.Scanln(&in)
+		if _, err := fmt.Scanln(&in); err != nil {
+			log.Fatal(err)
+		}
 		if in != "y" {
 			return
 		}
-		files, ferr = b.Files(*ExcludeExtras)
+		files, err = b.Files(*excludeExtras)
 	} else {
-		files, ferr = b.Thread(thread).Files(*ExcludeExtras)
+		files, err = b.Thread(thread).Files(*excludeExtras)
 	}
 
-	if ferr != nil {
-		panic(ferr)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	var (
-		p          = pipe.New(*Limit)
-		ch         = make(chan Detail)
-		start      = time.Now()
-		done       int
-		downloaded uint64
+		ctx   = context.Background()
+		delta uint64
+		done  uint64
+		start = time.Now()
+		p     = pipe.New(*limit)
+		wg    sync.WaitGroup
 	)
 
-	for _, file := range files {
-		go download(p, ch, file)
+	wg.Add(len(files))
+	for _, f := range files {
+		f := f
+
+		p.Increment()
+		go func() {
+			defer wg.Done()
+			defer p.Decrement()
+
+			var (
+				dir  = filepath.Join(*out, f.Board())
+				name = fmt.Sprintf("%s.%s", f.Name(), f.Extension())
+			)
+
+			n, err := download(ctx, f.URL(), dir, name)
+
+			prefix := fmt.Sprintf("[%d/%d]", atomic.AddUint64(&done, 1), len(files))
+
+			if err != nil {
+				fmt.Printf(
+					"%s Failed to download %s\nReason: %s\n",
+					prefix,
+					filepath.Join(f.Board(), name),
+					err.Error(),
+				)
+				return
+			}
+
+			fmt.Printf(
+				"%s Downloaded %s (%s)\n",
+				prefix,
+				filepath.Join(f.Board(), name),
+				humanize.Bytes(uint64(n)),
+			)
+
+			atomic.AddUint64(&delta, uint64(n))
+		}()
 	}
 
-	for {
-		if done == len(files) {
-			break
-		}
+	wg.Wait()
 
-		d := <-ch
-		done++
-		str := fmt.Sprintf("[%d/%d] ", done, len(files))
-		if d.Error != nil {
-			fmt.Printf("%sFailed to download %s/%s.%s\n\tReason: %s\n", str,
-				d.File.Board(), d.File.Name(), d.File.Extension(), d.Error.Error())
-		} else {
-			fmt.Printf("%sFinished downloading %s/%s.%s (%s)\b\n", str,
-				d.File.Board(), d.File.Name(), d.File.Extension(), humanize.Bytes(d.Size))
-			downloaded += d.Size
-		}
-	}
-
-	fmt.Printf("Downloaded %d files (%s) in %s\n", len(files), humanize.Bytes(downloaded), time.Since(start))
-}
-
-func download(p pipe.Pipe, ch chan Detail, f board.File) {
-	p.Increment()
-	go func() {
-		defer p.Decrement()
-
-		if err := os.MkdirAll(filepath.Join(*Output, f.Board()), os.ModePerm); err != nil {
-			ch <- Detail{File: f, Error: err}
-			return
-		}
-
-		if _, err := os.Stat(dir(f)); err == nil {
-			ch <- Detail{File: f, Error: errors.New("File already exists")}
-			return
-		}
-
-		res, err := http.Get(f.URL())
-		if err != nil {
-			ch <- Detail{File: f, Error: err}
-			return
-		}
-		defer res.Body.Close()
-
-		if res.StatusCode != 200 {
-			ch <- Detail{File: f, Error: fmt.Errorf("unexpected status code %d", res.StatusCode)}
-			return
-		}
-
-		out, err := os.Create(dir(f))
-		if err != nil {
-			ch <- Detail{File: f, Error: err}
-			return
-		}
-		defer out.Close()
-
-		w, err := io.Copy(out, res.Body)
-		ch <- Detail{f, err, uint64(w)}
-	}()
-}
-
-func dir(f board.File) string {
-	return filepath.Join(*Output, f.Board(), fmt.Sprintf("%s.%s", f.Name(),
-		f.Extension()))
+	fmt.Printf(
+		"Downloaded %d files (%s) in %s\n",
+		len(files),
+		humanize.Bytes(delta),
+		time.Since(start),
+	)
 }
