@@ -55,7 +55,7 @@ func New(u *url.URL) (Board, error) {
 
 func Detail(u *url.URL) (board, thread string, err error) {
 	switch u.Host {
-	case "boards.4chan.org", "www.4chan.org", "4chan.org":
+	case "boards.4chan.org", "www.4chan.org", "4chan.org", "boards.4channel.org", "www.4channel.org", "4channel.org":
 		return DetailChan4(u)
 	case "www.7chan.org", "7chan.org":
 		return DetailChan7(u)
